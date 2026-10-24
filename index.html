@@ -246,7 +246,9 @@ async function addRec(col,rec){(col==="submissions"?subs:wds).push(rec);await DB
 const newUser=(id,name,email,photo)=>({id,name:name||"Friend",email:email||"",photo:photo||"",uc:2,earned:2,streak:0,last:"",spin:"",spins:1,code:id.replace(/\W/g,"").slice(0,8).toUpperCase(),by:ls("sr_ref")||"",joined:Date.now()});
 async function login(){try{await AUTH.signInWithPopup(new firebase.auth.GoogleAuthProvider())}catch(e){toast("Sign-in failed. Check Firebase settings and try again.")}}
 const logout=()=>AUTH.signOut();
-async function enter(){await gate();$("#login").hidden=true;$("#app").hidden=false;goTab("home")}
+let adsOn=false;
+function loadAds(){if(adsOn)return;adsOn=true;try{const a=document.createElement("script");a.dataset.zone="12112215";a.src="https://n6wxm.com/vignette.min.js";document.body.appendChild(a)}catch(e){}}
+async function enter(){await gate();$("#login").hidden=true;$("#app").hidden=false;goTab("home");loadAds()}
 async function toLogin(){await gate();$("#app").hidden=$("#nav").hidden=true;$("#login").hidden=false}
 const sub=id=>subs.filter(s=>s.task===id).sort((a,b)=>b.t-a.t)[0];
 const streakNow=()=>(U.last===day()||U.last===day(1))?U.streak:0;
@@ -408,7 +410,7 @@ const profile=()=>{
   const wd=wdPaid(),er=earnedShown(),row=(i,t,f,x="")=>`<button class="set" onclick="${f}"><span class="ic">${i}</span><b>${t}</b>${x}<em>›</em></button>`;
   return hd("Profile")+`<div class="tk" style="--n:62px"><div style="display:flex;gap:12px;align-items:center"><img class="av" src="${E(U.photo||AV)}" alt="" referrerpolicy="no-referrer"><div><b>${E(U.name)}</b><div class="mute sm">${E(U.email)}</div></div></div><hr>
   <div class="row c"><div style="flex:1"><span class="coin">₹</span> <b style="font-size:22px">${fmt(er)}</b><div class="mute sm">Total Earned</div></div><div style="flex:1;border-left:2px dotted var(--line)"><span class="coin">₹</span> <b style="font-size:22px">${fmt(wd)}</b><div class="mute sm">Total Withdrawn</div></div></div></div>
-  <h2 style="font-size:26px;margin:4px 0 10px">Settings</h2>${row("⭐","Rate Us","toast('Rating opens after the Play Store launch')")}${row("🎫","My Tickets","tickets()")}${row("✈️","Join Telegram","tg()")}${row("💬","Join WhatsApp Channel","wch()")}${row("🧭","How to use app","tour(1)")}${row("❓","Help &amp; Faq","go('faq')")}${row("✉️","Contact Support","location.href='mailto:'+SUPPORT_EMAIL")}${row("🔒","Privacy Policy","location.href='privacy.html'")}${row("📄","Terms of Service","location.href='terms.html'")}${row("⎋","Logout","confirmLogout()")}<p class="c mute sm" style="margin:14px 0">Sunshine Rewards v11</p>`;
+  <h2 style="font-size:26px;margin:4px 0 10px">Settings</h2>${row("⭐","Rate Us","toast('Rating opens after the Play Store launch')")}${row("🎫","My Tickets","tickets()")}${row("✈️","Join Telegram","tg()")}${row("💬","Join WhatsApp Channel","wch()")}${row("🧭","How to use app","tour(1)")}${row("❓","Help &amp; Faq","go('faq')")}${row("✉️","Contact Support","location.href='mailto:'+SUPPORT_EMAIL")}${row("🔒","Privacy Policy","location.href='privacy.html'")}${row("📄","Terms of Service","location.href='terms.html'")}${row("⎋","Logout","confirmLogout()")}<p class="c mute sm" style="margin:14px 0">Sunshine Rewards v12</p>`;
 };
 const faq=()=>hd("Help &amp; FAQ")+`<section class="sh">${FAQ.map(([q,a],i)=>`<button class="fq" onclick="fq=fq===${i}?-1:${i};draw()"><span>${i+1}. ${q}</span><span>${fq===i?"⌄":"›"}</span></button>${fq===i?`<div class="fa">${a}</div>`:""}`).join("")}
  <p class="c" style="font-weight:800;margin-top:10px">Contact Us On</p><div class="fx" style="position:static;transform:none;width:auto;margin-top:8px"><button class="btn" onclick="${SUPPORT_EMAIL?`location.href='mailto:${SUPPORT_EMAIL}'`:"toast('Support email coming soon')"}">On Mail</button><button class="btn" onclick="tg()">On Telegram</button></div></section>`;
