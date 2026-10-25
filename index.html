@@ -192,6 +192,29 @@ nav svg{width:24px;height:24px;fill:none;stroke:#fff;stroke-width:1.9;stroke-lin
 #splash small{color:#7A6A55;position:relative}
 #login p{color:#7A6A55;position:relative;font-weight:700}
 #login .slogo,#login .btn{position:relative}
+/* ---- Sunshine Lifafa ---- */
+#lf{position:fixed;inset:0;z-index:60;display:none;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;color:#fff;text-align:center;padding:20px;background:radial-gradient(circle at 50% 36%,#FFB82E,#E8590C 60%,#7A2400)}
+#lf.on{display:flex;animation:in .4s ease-out}#lf.over{background:radial-gradient(circle at 50% 36%,#9A9DB5,#4F5370 62%,#23263B)}
+#lf .ray{position:absolute;left:50%;top:36%;width:950px;height:950px;margin:-475px;border-radius:50%;background:repeating-conic-gradient(rgba(255,255,255,.16) 0 7deg,transparent 7deg 18deg);animation:turn 40s linear infinite;pointer-events:none}
+#lf.over .ray{opacity:.25}#lf>*{position:relative}#lf .ray{position:absolute}
+#lf h1{font-size:40px;text-shadow:0 3px 0 rgba(120,40,0,.35)}#lf p{margin:6px 0 4px;font-weight:700;opacity:.95}#lf small{margin-top:12px;font-weight:800;opacity:.85}
+.lfb{max-width:290px;background:#fff!important;color:var(--a3)!important;border-bottom-color:#E5C7A0!important;margin-top:22px!important;animation:lfg 1.8s infinite}
+@keyframes lfg{50%{box-shadow:0 0 0 10px rgba(255,255,255,.25)}}
+.lfsun{width:120px;height:120px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#FFF6B0,#FFC21A 60%,#FF7A00);box-shadow:0 0 0 14px rgba(255,233,168,.3),0 0 70px 20px rgba(255,200,60,.7);animation:lfr 1.1s ease-out}
+@keyframes lfr{from{transform:translateY(170px) scale(.5);opacity:.2}}
+.lfsad{font-size:96px;animation:lfb 3s ease-in-out infinite}
+.lfe{position:relative;width:240px;height:160px;margin:34px 0 8px;animation:lfb 2.4s ease-in-out infinite}
+@keyframes lfb{50%{transform:translateY(-10px) rotate(-1.5deg)}}
+.lfe div{position:absolute}.lfe .bk{inset:0;border-radius:14px;background:linear-gradient(160deg,#C2281D,#8F1308);box-shadow:0 18px 40px rgba(60,10,0,.45)}
+.lfe .tk{left:16px;right:16px;top:14px;bottom:14px;border-radius:10px;background:linear-gradient(#FFF6D0,#FFD86B);color:#7A3F00;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding-top:10px;z-index:1;transition:transform .9s cubic-bezier(.2,.9,.3,1.25)}
+.lfe .tk small{margin:0;font-size:11px;opacity:.8}.lfe .tk b{font:800 38px 'Baloo 2';line-height:1.1}
+.lfe .fr{inset:0;z-index:2;border-radius:0 0 14px 14px;background:linear-gradient(160deg,#E23A25,#B01C10);clip-path:polygon(0 36%,50% 72%,100% 36%,100% 100%,0 100%)}
+.lfe .fl{left:0;right:0;top:0;height:60%;z-index:3;border-radius:14px 14px 0 0;background:linear-gradient(#F0502F,#C42815);clip-path:polygon(0 0,100% 0,50% 100%);transform-origin:top;transition:transform .6s ease}
+.lfe .sl{left:50%;top:50%;width:54px;height:54px;margin:-22px 0 0 -27px;z-index:4;border-radius:50%;display:grid;place-items:center;font-size:26px;background:radial-gradient(circle at 35% 30%,#FFF6B0,#FFC21A 60%,#E58A00);border:3px solid #FFE98A;box-shadow:0 0 0 6px rgba(255,214,90,.35);animation:lfp 1.6s infinite}
+@keyframes lfp{50%{transform:scale(1.12)}}
+.lfe.open{animation:none}.lfe.open .fl{transform:rotateX(180deg);z-index:0}.lfe.open .tk{transform:translateY(-84px) scale(1.1)}
+.lfe.open .sl{animation:none;transition:.5s;transform:scale(3);opacity:0}
+.lfc{position:absolute!important;top:0;z-index:5}
 </style>
 </head>
 <body>
@@ -316,7 +339,7 @@ async function addRec(col,rec){(col==="submissions"?subs:wds).push(rec);await DB
 const newUser=(id,name,email,photo)=>({id,name:name||"Friend",email:email||"",photo:photo||"",uc:0,earned:0,streak:0,last:"",spin:"",spins:1,hist:[],code:id.replace(/\W/g,"").slice(0,8).toUpperCase(),by:ls("sr_ref")||"",joined:Date.now()});
 async function login(){try{await AUTH.signInWithPopup(new firebase.auth.GoogleAuthProvider())}catch(e){toast("Sign-in failed. Check Firebase settings and try again.")}}
 const logout=()=>AUTH.signOut();
-async function enter(){await gate();$("#login").hidden=true;$("#app").hidden=false;goTab("home");setTimeout(showNewMsg,900)}
+async function enter(){await gate();$("#login").hidden=true;$("#app").hidden=false;goTab("home");setTimeout(showNewMsg,900);if(LF_LINK)setTimeout(lifafaCheck,400)}
 async function toLogin(){await gate();$("#app").hidden=$("#nav").hidden=true;$("#login").hidden=false}
 const sub=id=>subs.filter(s=>s.task===id).sort((a,b)=>b.t-a.t)[0];
 const streakNow=()=>(U.last===day()||U.last===day(1))?U.streak:0;
@@ -506,6 +529,59 @@ function tour(replay){return new Promise(res=>{
     <button class="btn" id="tn" style="max-width:380px">${last?"Get Started":i?"Next":"Show me how"}</button>`;
     el.querySelector("#tk").onclick=done;el.querySelector("#tn").onclick=()=>{if(last)done();else{i++;r()}};};
   r();});}
+
+/* ---- Sunshine Lifafa ---- */
+const LF_CODE=new URLSearchParams(location.search).get("lifafa");let LF_LINK=LF_CODE!==null;let LF=null;
+const lfBox=()=>{let b=$("#lf");if(!b){b=document.createElement("div");b.id="lf";document.body.appendChild(b)}return b};
+function lfClose(){try{history.replaceState(null,"",location.pathname)}catch(e){}LF_LINK=false;const b=$("#lf");if(b){b.className="";b.innerHTML=""}if(U)draw()}
+async function lifafaCheck(){
+  if(!U)return;
+  try{
+    const d=await DB.collection("lifafa").doc("main").get();
+    if(!d.exists||d.data().on===false)return lfView("over");
+    LF=d.data();if(LF_CODE!==LF.lid)return lfView("over");
+    const mine=(await DB.collection("lifafaClaims").doc(LF.lid+"_"+U.id).get()).exists;
+    if(mine){if(LF_LINK)lfView("done");return}
+    if((LF.n||0)>=LF.max){if(LF_LINK)lfView("over");return}
+    lfView("ready");
+  }catch(e){}
+}
+function lfView(v){
+  const b=lfBox(),ray='<div class="ray"></div>';
+  if(v!=="ready"){
+    b.className="on over";sfx("error");
+    b.innerHTML=ray+`<div class="lfsad">🌥️</div><h1>${v==="done"?"Already opened":"Lifafa is over"}</h1><p>${v==="done"?"You have already claimed this Lifafa.":"The sun has set on this one. Watch our channel for the next Lifafa!"}</p><button class="btn lfb" onclick="lfClose()">Go Back</button>`;return;
+  }
+  b.className="on";b.innerHTML=ray+'<div class="lfsun"></div><p>Sunrise… your Lifafa is on its way</p>';
+  setTimeout(()=>{if(!$("#lf.on"))return;sfx("ding");
+    b.innerHTML=ray+`<h1>Sunshine Lifafa</h1><p>A surprise is waiting inside ✨</p><div class="lfe" id="lfe"><div class="bk"></div><div class="tk"><small>YOU RECEIVED</small><b id="lfa">₹?</b></div><div class="fr"></div><div class="fl"></div><div class="sl">☀️</div></div><button class="btn lfb" id="lfc" onclick="lfClaim()">Claim Now</button><small>Only for the first ${LF.max} users</small>`},1100);
+}
+async function lfClaim(){
+  const bt=$("#lfc");bt.disabled=true;bt.textContent="Opening…";
+  const mref=DB.collection("lifafa").doc("main"),uref=DB.collection("users").doc(U.id);let amt=0,lid="";
+  try{
+    await DB.runTransaction(async tx=>{
+      const m=(await tx.get(mref)).data();lid=m.lid;amt=m.amt;
+      const cref=DB.collection("lifafaClaims").doc(lid+"_"+U.id);
+      if((await tx.get(cref)).exists)throw "done";
+      if(m.on===false||(m.n||0)>=m.max)throw "over";
+      const u=(await tx.get(uref)).data();
+      tx.set(cref,{uid:U.id,lid,amt,t:Date.now()});
+      tx.update(mref,{n:(m.n||0)+1});
+      tx.update(uref,{uc:(u.uc||0)+amt,earned:(u.earned||0)+amt,hist:[...(u.hist||[]),{t:Date.now(),k:"bonus",amt,n:"Sunshine Lifafa"}].slice(-100),lf:lid});
+    });
+  }catch(e){
+    if(e==="done"||e==="over")return lfView(e);
+    bt.disabled=false;bt.textContent="Claim Now";return toast("Could not open. Please try again.");
+  }
+  U.uc=(U.uc||0)+amt;U.earned=(U.earned||0)+amt;U.lf=lid;addHist("bonus",amt,"Sunshine Lifafa");
+  $("#lfe").classList.add("open");sfx("claim");setTimeout(boom,500);
+  const a=$("#lfa"),b=$("#lf");let k=0;const iv=setInterval(()=>{k=Math.min(amt,k+amt/18);a.textContent="₹"+fmt(k);if(k>=amt)clearInterval(iv)},45);
+  for(let i=0;i<16;i++){const c=document.createElement("span");c.className="coin lfc";c.textContent="₹";c.style.left=Math.random()*92+"%";b.appendChild(c);
+    c.animate([{transform:"translateY(-40px) rotate(0)"},{transform:`translateY(${innerHeight+60}px) rotate(${360+Math.random()*360}deg)`}],{duration:1500+Math.random()*1500,delay:600+Math.random()*700,easing:"ease-in",fill:"backwards"}).onfinish=()=>c.remove()}
+  bt.disabled=false;bt.textContent="Awesome!";bt.onclick=lfClose;
+  const s=b.querySelector("small:last-child");if(s)s.textContent="Added to your wallet 🎉";
+}
 
 /* ---- boot ---- */
 (function boot(){
