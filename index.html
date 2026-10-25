@@ -497,7 +497,7 @@ async function doRedeem(k){
   else{rec.upi=rec.acc=$("#ac").value.trim();rec.ifsc=$("#if").value.trim().toUpperCase();if(!/^\d{9,18}$/.test(rec.acc))return toast("Enter a valid account number.");if(!/^[A-Z]{4}0[A-Z0-9]{6}$/.test(rec.ifsc))return toast("Enter a valid IFSC code.")}
   if(!(am>=5&&am<=500))return toast("Amount must be between 5 and 500.");
   if(am>U.uc)return toast("You do not have enough balance.");
-  if(WDB)return;WDB=1;const okAd=await adBreak();WDB=0;if(!okAd)return;
+  if(WDB)return;WDB=1;setTimeout(()=>WDB=0,4000);if(WD_AD.url)try{open(WD_AD.url,"_blank")}catch(e){}
   U.uc-=am;await save();await addRec("withdrawals",rec);WTB="red";hist=[];P="wallet";draw();sfx("cash");boom();msg(true,"Success","Withdrawal requested. It will be paid after review.");
 }
 
@@ -586,21 +586,8 @@ async function lfClaim(){
   const s=b.querySelector("small:last-child");if(s)s.textContent="Added to your wallet 🎉";
 }
 
-/* ---- withdrawal ad break: paste your Monetag Direct Link URL below ---- */
+/* ---- withdrawal ad: Monetag Direct Link opens when the user taps Transfer ---- */
 const WD_AD={url:"https://uplcm.com/4/12118757"};let WDB=0;
-function adBreak(){
-  if(!WD_AD.url)return Promise.resolve(true);
-  return new Promise(res=>{
-    const b=lfBox();let t0=0,ok=false,hid=false;
-    b.className="on";
-    b.innerHTML='<div class="ray"></div><h1>One quick step</h1><p>Watch a short sponsor page, then come back to confirm your withdrawal.</p><button class="btn lfb" id="adg">Watch Ad</button><small id="adx" style="cursor:pointer;text-decoration:underline">Cancel</small>';
-    const g=$("#adg"),end=v=>{document.removeEventListener("visibilitychange",vc);b.className="";b.innerHTML="";res(v)};
-    const ready=()=>{ok=true;g.disabled=false;g.textContent="Continue";g.onclick=()=>end(true)};
-    function vc(){if(document.hidden){hid=true;return}if(!hid||ok)return;g.textContent="Please wait…";setTimeout(ready,Math.max(0,5000-(Date.now()-t0)))}
-    g.onclick=()=>{t0=Date.now();g.disabled=true;g.textContent="Opening ad…";document.addEventListener("visibilitychange",vc);open(WD_AD.url,"_blank");setTimeout(()=>{if(!hid&&!ok){g.disabled=false;g.textContent="Watch Ad";toast("Please allow the ad page to open.")}},2500)};
-    $("#adx").onclick=()=>end(false);
-  });
-}
 
 /* ---- boot ---- */
 (function boot(){
