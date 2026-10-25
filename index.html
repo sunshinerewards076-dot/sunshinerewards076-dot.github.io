@@ -170,6 +170,28 @@ nav svg{width:24px;height:24px;fill:none;stroke:#fff;stroke-width:1.9;stroke-lin
 .wst div{background:rgba(255,255,255,.22);border-radius:14px;padding:10px 6px;text-align:center}
 .wst b{display:block;font:800 18px 'Baloo 2'}.wst span{font-size:11px}
 .yn{display:flex;gap:10px;margin-top:8px}.yn .btn{margin:0}
+.fx{align-items:center}
+.fx .btn{flex:1;white-space:nowrap;min-height:52px;padding:12px 10px;align-items:center}
+.btn.sec{background:#fff;color:var(--a3);border:2px solid var(--a2);border-bottom-width:4px;box-shadow:none}
+.adw{position:relative;margin:14px 0;border-radius:18px;overflow:hidden;background:#fff;border:1.5px solid var(--line)}
+.adw iframe{width:100%;height:130px;border:0;display:block}
+.adl{position:absolute;top:6px;right:8px;font:700 10px system-ui;background:#FFE7AE;color:#7A4A00;border-radius:6px;padding:1px 6px;z-index:2}
+.bell{position:relative;border:0;background:rgba(255,255,255,.75);width:40px;height:40px;border-radius:50%;font-size:18px;cursor:pointer;flex:none}
+.bell i{position:absolute;top:-4px;right:-4px;min-width:18px;height:18px;border-radius:9px;background:#E00000;color:#fff;font:700 11px/18px system-ui;font-style:normal;text-align:center;padding:0 4px}
+.md.bad{animation:shake .5s}
+@keyframes shake{20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}
+.hrow{display:flex;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid #F7ECCB}
+.hic{width:42px;height:42px;border-radius:12px;background:var(--tint);display:grid;place-items:center;font-size:20px;flex:none}
+.hrow>div{flex:1}.hp{color:#1E8A3A;font:800 18px 'Baloo 2'}
+#splash,#login{background:linear-gradient(180deg,#FFE18A 0,#FFF3CF 42%,#fff 100%);overflow:hidden}
+.rays{position:absolute;left:50%;top:38%;width:900px;height:900px;margin:-450px 0 0 -450px;background:repeating-conic-gradient(rgba(255,170,0,.18) 0 7deg,transparent 7deg 20deg);-webkit-mask:radial-gradient(circle,#000 0,transparent 66%);mask:radial-gradient(circle,#000 0,transparent 66%);animation:turn 60s linear infinite;pointer-events:none}
+.tag{font:800 21px 'Baloo 2';color:#B45500;margin-top:-6px;animation:in .8s .8s both;position:relative}
+.pbar{position:relative;width:210px;height:8px;border-radius:99px;background:rgba(232,89,12,.16);overflow:hidden}
+.pbar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#FFC93C,#E8590C);animation:fill 2.8s ease-out forwards}
+@keyframes fill{from{width:0}to{width:100%}}
+#splash small{color:#7A6A55;position:relative}
+#login p{color:#7A6A55;position:relative;font-weight:700}
+#login .slogo,#login .btn{position:relative}
 </style>
 </head>
 <body>
@@ -189,7 +211,7 @@ const FB={apiKey:"AIzaSyBoomsal7jbIuLTvBBIUM0TgDwfRY0sbdY",authDomain:"sunshine-
 const TELEGRAM="https://t.me/Sunshinrewards",WHATSAPP="https://whatsapp.com/channel/0029Vb8haeZ9RZAR8Jef1a2k",SUPPORT_EMAIL="sunshinerewards076@gmail.com";
 const OFFERS=[
  {id:"5paisa",name:"5paisa",sub:"Demat Account",logo:"5p",img:IMG.fivep,reward:260,link:"https://5paisa.page.link/M1rxcwtc9TTVE2iy9",code:"55919393",
-  steps:[{t:"Account Open",items:["Install 5paisa using the link","Register with the referral code below","Complete KYC and open your Demat account","Upload proof after the account is opened","Reward credit within 1 to 3 days"]}]},
+  steps:[{t:"Account Open",items:["Install 5paisa using the link","Register with the referral code below","Complete KYC and open your Demat account","Do a trade of above ₹100","Upload proof after the trade","Reward credit within 1 to 3 days","⚠️ Important: You must do a trade of above ₹100. Without the trade the reward will not be credited."]}]},
  {id:"angelone",name:"Angel One",sub:"Free Demat Account",logo:"AO",img:IMG.angel,reward:120,link:"https://angel-one.onelink.me/Wjgr/2mex7ivv",
   steps:[{t:"Account Open",items:["Download Angel One using the link","Register with your mobile number and verify OTP","Complete KYC using Aadhaar and PAN","Open your Free Demat Account","Upload proof using the button below","Reward credit after account approval","⚠️ Important: Open the account only through the link. The link may expire within 48 hours."]}]},
  {id:"stablemoney",name:"Stable Money",sub:"Book First FD",logo:"SM",img:IMG.stable,reward:200,link:"https://stablemoney.onelink.me/rkWL/jfbiar54",
@@ -236,6 +258,54 @@ function boom(){
     e.animate([{transform:"translate(0,0)",opacity:1},{transform:`translate(${Math.cos(a)*d}px,${Math.sin(a)*d+160}px) rotate(${Math.random()*720}deg)`,opacity:0}],{duration:1300,easing:"cubic-bezier(.15,.8,.3,1)"}).onfinish=()=>e.remove();}
 }
 
+/* ---- sound ---- */
+let AC;
+document.addEventListener("pointerdown",()=>{try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();if(AC.state==="suspended")AC.resume()}catch(e){}},{passive:true});
+const snd=()=>ls("sr_snd")!==0;
+function toggleSnd(){ls("sr_snd",snd()?0:1);draw();if(snd())sfx("ding")}
+function sfx(k){
+  if(!snd()||!AC)return;
+  try{
+    const n=AC.currentTime,T=(f,s,d,ty,v)=>{const o=AC.createOscillator(),g=AC.createGain();o.type=ty||"sine";o.frequency.value=f;g.gain.setValueAtTime(.0001,n+s);g.gain.exponentialRampToValueAtTime(v||.2,n+s+.02);g.gain.exponentialRampToValueAtTime(.0001,n+s+d);o.connect(g);g.connect(AC.destination);o.start(n+s);o.stop(n+s+d+.05)};
+    ({claim(){[[784,0],[988,.1],[1175,.2],[1568,.32]].forEach(([f,s])=>T(f,s,.35,"triangle",.22));T(2349,.45,.5,"sine",.12)},
+      error(){T(220,0,.18,"sawtooth",.16);T(150,.17,.32,"sawtooth",.18)},
+      submit(){T(660,0,.15,"triangle");T(880,.12,.15,"triangle");T(1320,.24,.4,"triangle")},
+      cash(){T(1318,0,.12,"square",.08);T(1760,.09,.4,"square",.08);T(2093,.2,.5,"sine",.15);T(2637,.3,.5,"sine",.1)},
+      ding(){T(988,0,.25,"sine",.2);T(1319,.12,.4,"sine",.18)}})[k]()
+  }catch(e){}
+}
+/* ---- earning history ---- */
+const HI={task:"🎯",spin:"🎡",checkin:"🎁",bonus:"🎉",ref:"👥",admin:"⚙️"};
+function addHist(k,amt,n){U.hist=[...(U.hist||[]),{t:Date.now(),k,amt,n}].slice(-100)}
+function openHistory(){
+  const h=[...(U.hist||[])].sort((a,b)=>b.t-a.t),sum=h.reduce((a,e)=>a+(e.amt||0),0),rest=Math.max(0,Math.round((earnedShown()-sum)*100)/100);
+  const r=(ic,n,t,a)=>`<div class="hrow"><span class="hic">${ic}</span><div><b>${E(n)}</b><div class="mute sm">${t}</div></div><b class="hp">+${fmt(a)}</b></div>`;
+  openSheet(`<div class="row"><h2>Earning History</h2><button class="rb" aria-label="Close" onclick="closeSheet()">✕</button></div><p class="mute sm" style="margin:2px 0 12px">Total earned: ${fmt(earnedShown())} SC</p>${h.map(e=>r(HI[e.k]||"₹",e.n||"Reward",new Date(e.t).toLocaleDateString(),e.amt)).join("")}${rest?r("🕒","Earlier earnings","Before history tracking",rest):""}${!h.length&&!rest?'<p class="c mute" style="padding:30px 0">No earnings yet.</p>':""}`);
+}
+/* ---- messages from admin ---- */
+let msgs=[];
+const unread=()=>msgs.filter(m=>!m.read).length;
+const bell=()=>`<button class="bell" aria-label="Messages" onclick="go('inbox')">🔔${unread()?`<i>${unread()}</i>`:""}</button>`;
+async function loadMsgs(){try{const m=await DB.collection("messages").where("uid","==",U.id).get();msgs=m.docs.map(d=>({id:d.id,...d.data()}))}catch(e){msgs=[]}}
+async function markRead(){const u=msgs.filter(m=>!m.read);u.forEach(m=>m.read=true);try{await Promise.all(u.map(m=>DB.collection("messages").doc(m.id).update({read:true})))}catch(e){}}
+const nl=s=>E(s).replace(/\n/g,"<br>");
+function showNewMsg(){
+  const u=msgs.filter(m=>!m.read).sort((a,b)=>b.t-a.t);if(!u.length)return;sfx("ding");
+  openSheet(`<div class="md ok"><div class="ic">💌</div><h2 style="font-size:24px">Message from Sunshine Team</h2><p style="text-align:left;margin-top:12px">${nl(u[0].text)}</p>${u.length>1?`<p class="mute sm">+${u.length-1} more in Messages</p>`:""}<button class="btn" onclick="markRead().then(draw);closeSheet()">Got it</button></div>`,1);
+}
+const inbox=()=>{
+  const l=[...msgs].sort((a,b)=>b.t-a.t),nw=new Set(l.filter(m=>!m.read).map(m=>m.id));
+  setTimeout(()=>{if(P==="inbox"&&nw.size)markRead()},700);
+  return hd("Messages")+(l.length?l.map(m=>`<div class="card" style="${nw.has(m.id)?"border-color:var(--a2);background:#FFF8E6":""}"><div class="row"><b>${E(m.from||"Sunshine Team")}</b><span class="mute sm">${new Date(m.t).toLocaleDateString()}</span></div><p style="margin-top:6px">${nl(m.text)}</p>${nw.has(m.id)?'<span class="chip">New</span>':""}</div>`).join(""):'<p class="c mute" style="padding:60px 0">No messages yet.</p>');
+};
+/* ---- ads: only on task page and wallet, inside a bottom banner box ---- */
+const adSlot=()=>`<div class="adw" id="adw" hidden><span class="adl">Ad</span><iframe id="adf" title="Advertisement" scrolling="no"></iframe></div>`;
+function mountAd(){
+  const w=$("#adw"),f=$("#adf");if(!w||!f)return;
+  f.srcdoc='<!doctype html><html><head><meta charset="utf-8"><style>html,body{margin:0;background:transparent;overflow:hidden}</style></head><body><script>(function(s){s.dataset.zone="12112284",s.src="https://nap5k.com/tag.min.js"})(document.body.appendChild(document.createElement("script")))<\/script></body></html>';
+  f.onload=()=>{try{const b=f.contentDocument.body,chk=()=>{if([...b.children].some(c=>c.tagName!=="SCRIPT"))w.hidden=false};new MutationObserver(chk).observe(b,{childList:true});setTimeout(chk,1500)}catch(e){}};
+}
+
 /* ---- data ---- */
 const save=()=>DB.collection("users").doc(U.id).set(U);
 async function loadLists(){
@@ -243,12 +313,10 @@ async function loadLists(){
   subs=a.docs.map(d=>d.data());wds=b.docs.map(d=>d.data());
 }
 async function addRec(col,rec){(col==="submissions"?subs:wds).push(rec);await DB.collection(col).add(rec)}
-const newUser=(id,name,email,photo)=>({id,name:name||"Friend",email:email||"",photo:photo||"",uc:2,earned:2,streak:0,last:"",spin:"",spins:1,code:id.replace(/\W/g,"").slice(0,8).toUpperCase(),by:ls("sr_ref")||"",joined:Date.now()});
+const newUser=(id,name,email,photo)=>({id,name:name||"Friend",email:email||"",photo:photo||"",uc:2,earned:2,streak:0,last:"",spin:"",spins:1,hist:[{t:Date.now(),k:"bonus",amt:2,n:"Welcome bonus"}],code:id.replace(/\W/g,"").slice(0,8).toUpperCase(),by:ls("sr_ref")||"",joined:Date.now()});
 async function login(){try{await AUTH.signInWithPopup(new firebase.auth.GoogleAuthProvider())}catch(e){toast("Sign-in failed. Check Firebase settings and try again.")}}
 const logout=()=>AUTH.signOut();
-let adsOn=false;
-function loadAds(){if(adsOn)return;adsOn=true;try{[["12112215","https://n6wxm.com/vignette.min.js"],["12112284","https://nap5k.com/tag.min.js"]].forEach(([z,u])=>{const a=document.createElement("script");a.dataset.zone=z;a.src=u;document.body.appendChild(a)})}catch(e){}}
-async function enter(){await gate();$("#login").hidden=true;$("#app").hidden=false;goTab("home");loadAds()}
+async function enter(){await gate();$("#login").hidden=true;$("#app").hidden=false;goTab("home");setTimeout(showNewMsg,900)}
 async function toLogin(){await gate();$("#app").hidden=$("#nav").hidden=true;$("#login").hidden=false}
 const sub=id=>subs.filter(s=>s.task===id).sort((a,b)=>b.t-a.t)[0];
 const streakNow=()=>(U.last===day()||U.last===day(1))?U.streak:0;
@@ -261,12 +329,13 @@ function back(){const h=hist.pop()||["home",null];P=h[0];A=h[1];draw()}
 function toEarn(t){ET=t;goTab("earn")}
 function draw(){
   clearInterval(bt);
-  const f={home,earn,refer,wallet,profile,rewards,offer,redeem,faq}[P];
+  const f={home,earn,refer,wallet,profile,rewards,offer,redeem,faq,inbox}[P];
   $("#app").innerHTML=`<div class="pg">${f(A)}</div>`;
   $("#nav").hidden=!TAB.includes(P);
   $("#nav").innerHTML=TABS.map(([k,l])=>`<button class="${k===P?"on":""}" aria-label="${l}" onclick="goTab('${k}')"><svg viewBox="0 0 24 24">${IC[k]}</svg><span>${l}</span></button>`).join("");
   scrollTo(0,0);
   if(P==="home")startBanner();
+  if(P==="offer"||P==="wallet")mountAd();
   if(P==="earn"&&loading)setTimeout(()=>{loading=false;if(P==="earn")draw()},500);
 }
 function startBanner(){let i=0;bt=setInterval(()=>{const t=$("#bt");if(!t)return;i=(i+1)%3;t.style.transform=`translateX(-${i*100}%)`},4200)}
@@ -283,7 +352,7 @@ const lg=(id,t)=>{const o=OFFERS.find(x=>x.id===id);return o&&o.img?`<img src="$
 const nm=id=>(OFFERS.find(o=>o.id===id)||{name:id}).name;
 
 /* ---- pages ---- */
-const home=()=>`<header class="hd"><img class="av" src="${E(U.photo||AV)}" alt="" referrerpolicy="no-referrer"><div class="hi"><small>Welcome back,</small><b>${E(U.name.split(" ")[0])}</b></div>${gift}${pill()}</header>
+const home=()=>`<header class="hd"><img class="av" src="${E(U.photo||AV)}" alt="" referrerpolicy="no-referrer"><div class="hi"><small>Welcome back,</small><b>${E(U.name.split(" ")[0])}</b></div>${bell()}${gift}${pill()}</header>
 <div class="bn"><div class="bt" id="bt">
  <button class="bs a" onclick="tg()"><h2>Join Sunshine Telegram Channel, Get Sun Coins</h2><span class="jb">Join Now</span></button>
  <button class="bs b" onclick="go('refer')"><h2>Refer friends. Earn for a lifetime!</h2><span class="jb">Refer Now</span></button>
@@ -301,8 +370,8 @@ function offer(id){
   <h2 style="font-size:24px;margin:4px 0 12px">Follow The Steps</h2>
   ${o.steps.map((st,i)=>`<div class="tk"><div class="row"><h3 style="font-size:22px">${i+1}. ${E(st.t)}</h3><div style="text-align:right">${i===L?`<b>${fmt(o.reward)}</b><br>${ch}`:""}</div></div><hr>${st.items.map(x=>`<div class="li">${E(x)}</div>`).join("")}
    ${i===0&&o.code?`<div class="code" style="font-size:16px"><span>Code: ${E(o.code)}</span><button class="btn sm2" onclick="copy('${E(o.code)}')">Copy</button></div>`:""}</div>`).join("")}
-  <div style="height:80px"></div>
-  <div class="fx">${ap?`<button class="btn" disabled>Task completed ✓</button>`:pd?`<button class="btn" disabled>Proof submitted. In review</button>`:(ls("sr_started")||{})[id]?`<a class="btn" style="flex:.8" href="${E(o.link)}" target="_blank" rel="noopener">Open link 🔗</a><button class="btn" style="background:#2B1600;color:#fff;border-bottom-color:#000" onclick="proofSheet('${id}')">⬆ Upload Proof</button>`:`<button class="btn" onclick="startTask('${id}')">⚡ Start Task</button>`}</div>`;
+  ${adSlot()}<div style="height:80px"></div>
+  <div class="fx">${ap?`<button class="btn" disabled>Task completed ✓</button>`:pd?`<button class="btn" disabled>Proof submitted. In review</button>`:(ls("sr_started")||{})[id]?`<a class="btn sec" href="${E(o.link)}" target="_blank" rel="noopener">Open Link</a><button class="btn" onclick="proofSheet('${id}')">Upload Proof</button>`:`<button class="btn" onclick="startTask('${id}')">Start Task</button>`}</div>`;
 }
 function startTask(id){const st=ls("sr_started")||{};st[id]=1;ls("sr_started",st);open(OFFERS.find(x=>x.id===id).link,"_blank");draw()}
 const shot=(f,q)=>new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{const k=Math.min(1,900/Math.max(im.width,im.height)),c=document.createElement("canvas");c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);c.getContext("2d").drawImage(im,0,0,c.width,c.height);res(c.toDataURL("image/jpeg",q))};im.onerror=rej;im.src=r.result};r.onerror=rej;r.readAsDataURL(f)});
@@ -321,7 +390,7 @@ async function sendProof(id){
     let d=await shot(f,.6);if(d.length>700000)d=await shot(f,.4);
     if(d.length>900000)throw new Error("big");
     await addRec("submissions",{uid:U.id,email:U.email,task:id,proof:"Email: "+e+" | Mobile: "+m,shot:d,status:"pending",t:Date.now()});
-    closeSheet();draw();toast("Proof submitted. We will review it soon.");
+    closeSheet();draw();sfx("submit");boom();msg(true,"Submitted","Your proof is submitted. We will review it soon.");
   }catch(x){b.disabled=false;b.textContent="Submit";toast("Could not upload. Try a smaller screenshot.")}
 }
 function shareOffer(id){open("https://wa.me/?text="+encodeURIComponent("Earn real money on Sunshine Rewards with the "+nm(id)+" offer: "+location.origin+location.pathname+"?ref="+U.code),"_blank")}
@@ -333,10 +402,10 @@ function rewards(){
   <div class="card t"><h3 class="c" style="font-size:22px">Statistics</h3><div class="g5">${Array.from({length:30},(_,i)=>`<div class="st ${i<s?"on":""}"><i>★</i>Day ${i+1}</div>`).join("")}</div></div>`;
 }
 async function checkin(){
-  if(U.last===day())return msg(false,"Error","You Have Already Checked In Today");
+  if(U.last===day()){sfx("error");return msg(false,"Error","You Have Already Checked In Today")}
   let s=streakNow()+1,t="Checked in. Come back tomorrow!";
-  if(s>=30){U.uc+=10;U.earned=(U.earned||0)+10;s=0;t="Treasure box opened: +10 Sun Coins";boom()}
-  U.streak=s;U.last=day();await save();draw();msg(true,"Success",t);
+  if(s>=30){U.uc+=10;U.earned=(U.earned||0)+10;addHist("checkin",10,"30-day streak treasure box");s=0;t="Treasure box opened: +10 Sun Coins"}
+  U.streak=s;U.last=day();sfx("claim");boom();await save();draw();msg(true,"Success",t);
 }
 
 const earn=()=>{
@@ -373,8 +442,8 @@ async function spin(){
   if(spinsOf(U)<1||spinning)return;spinning=true;$("#sbtn").disabled=true;
   const w=PRIZES.map(p=>WT[p]),tot=w.reduce((a,b)=>a+b);let r=Math.random()*tot,i=0;while(r>w[i]){r-=w[i];i++}
   $("#wheel").style.transform=`rotate(${360*6-(i*45+22.5)}deg)`;
-  const p=PRIZES[i];U.spins=spinsOf(U)-1;U.spin=day();U.uc+=p;U.earned=(U.earned||0)+p;
-  await new Promise(r=>setTimeout(r,4300));spinning=false;await save();boom();toast("You won "+p+" Sun Coins!");$("#sbtn").textContent="No chance left";if(P!=="offer")draw();
+  const p=PRIZES[i];U.spins=spinsOf(U)-1;U.spin=day();U.uc+=p;U.earned=(U.earned||0)+p;addHist("spin",p,"Spin & Earn win");
+  await new Promise(r=>setTimeout(r,4300));spinning=false;sfx("claim");await save();boom();toast("You won "+p+" Sun Coins!");$("#sbtn").textContent="No chance left";if(P!=="offer")draw();
 }
 function confirmLogout(){openSheet(`<div class="md ok"><div class="ic">!</div><h2 style="font-size:28px">Logout?</h2><p>Are you sure you want to logout?</p><div class="yn"><button class="btn red" onclick="closeSheet();logout()">Yes</button><button class="btn" onclick="closeSheet()">No</button></div></div>`,1)}
 
@@ -386,9 +455,9 @@ const wallet=()=>{
    :(wds.length?[...wds].sort((a,b)=>b.t-a.t).map(w=>rib(w.status==="paid"?"ok":w.status,w.status==="paid"?"Success":w.status==="rejected"?"Rejected":"Pending",(w.kind==="bank"?"Bank":"UPI")+" Withdrawal",w.amt+" SC on "+new Date(w.t).toLocaleDateString(),fmt(w.amt),w.kind==="bank"?"B":"U")).join(""):none);
   return hd("Wallet")+`<div class="wc"><span class="wl">Available Balance</span><div class="wb"><span class="coin">₹</span>${fmt(U.uc)}</div><div class="wn">Worth ₹${fmt(U.uc)}. 1 Sun Coin = 1 INR</div>
   <button class="btn wbtn" onclick="openWithdraw()">Withdraw Money</button>
-  <div class="wst"><div><b>${fmt(earned)}</b><span>Total Earned</span></div><div><b>${fmt(paid)}</b><span>Withdrawn</span></div><div><b>${fmt(pend)}</b><span>Pending</span></div></div></div>
+  <div class="wst"><div onclick="openHistory()" style="cursor:pointer"><b>${fmt(earned)}</b><span>Total Earned ›</span></div><div><b>${fmt(paid)}</b><span>Withdrawn</span></div><div><b>${fmt(pend)}</b><span>Pending</span></div></div></div>
   <p class="mute sm c" style="margin:-4px 0 14px">Minimum withdrawal 5 SC. Maximum 500 SC per request.</p>
-  <section class="sh"><div class="tabs"><button class="${WTB==="earn"?"on":""}" onclick="WTB='earn';draw()">Earnings</button><button class="${WTB==="red"?"on":""}" onclick="WTB='red';draw()">My Redeems</button></div>${list}</section>`;
+  <section class="sh"><div class="tabs"><button class="${WTB==="earn"?"on":""}" onclick="WTB='earn';draw()">Earnings</button><button class="${WTB==="red"?"on":""}" onclick="WTB='red';draw()">My Redeems</button></div>${list}</section>${adSlot()}`;
 };
 function openWithdraw(){openSheet(`<div class="row"><h2>Withdraw</h2><button class="rb" aria-label="Close" onclick="closeSheet()">✕</button></div><br>
  <div class="wd"><h3>UPI Transfer</h3><p>Withdraw your money by your UPI</p><button class="btn" onclick="closeSheet();go('redeem','upi')">Withdraw</button></div>
@@ -403,14 +472,14 @@ async function doRedeem(k){
   else{rec.upi=rec.acc=$("#ac").value.trim();rec.ifsc=$("#if").value.trim().toUpperCase();if(!/^\d{9,18}$/.test(rec.acc))return toast("Enter a valid account number.");if(!/^[A-Z]{4}0[A-Z0-9]{6}$/.test(rec.ifsc))return toast("Enter a valid IFSC code.")}
   if(!(am>=5&&am<=500))return toast("Amount must be between 5 and 500.");
   if(am>U.uc)return toast("You do not have enough balance.");
-  U.uc-=am;await save();await addRec("withdrawals",rec);WTB="red";hist=[];P="wallet";draw();msg(true,"Success","Withdrawal requested. It will be paid after review.");
+  U.uc-=am;await save();await addRec("withdrawals",rec);WTB="red";hist=[];P="wallet";draw();sfx("cash");boom();msg(true,"Success","Withdrawal requested. It will be paid after review.");
 }
 
 const profile=()=>{
   const wd=wdPaid(),er=earnedShown(),row=(i,t,f,x="")=>`<button class="set" onclick="${f}"><span class="ic">${i}</span><b>${t}</b>${x}<em>›</em></button>`;
   return hd("Profile")+`<div class="tk" style="--n:62px"><div style="display:flex;gap:12px;align-items:center"><img class="av" src="${E(U.photo||AV)}" alt="" referrerpolicy="no-referrer"><div><b>${E(U.name)}</b><div class="mute sm">${E(U.email)}</div></div></div><hr>
-  <div class="row c"><div style="flex:1"><span class="coin">₹</span> <b style="font-size:22px">${fmt(er)}</b><div class="mute sm">Total Earned</div></div><div style="flex:1;border-left:2px dotted var(--line)"><span class="coin">₹</span> <b style="font-size:22px">${fmt(wd)}</b><div class="mute sm">Total Withdrawn</div></div></div></div>
-  <h2 style="font-size:26px;margin:4px 0 10px">Settings</h2>${row("⭐","Rate Us","toast('Rating opens after the Play Store launch')")}${row("🎫","My Tickets","tickets()")}${row("✈️","Join Telegram","tg()")}${row("💬","Join WhatsApp Channel","wch()")}${row("🧭","How to use app","tour(1)")}${row("❓","Help &amp; Faq","go('faq')")}${row("✉️","Contact Support","location.href='mailto:'+SUPPORT_EMAIL")}${row("🔒","Privacy Policy","location.href='privacy.html'")}${row("📄","Terms of Service","location.href='terms.html'")}${row("⎋","Logout","confirmLogout()")}<p class="c mute sm" style="margin:14px 0">Sunshine Rewards v13</p>`;
+  <div class="row c"><div style="flex:1;cursor:pointer" onclick="openHistory()"><span class="coin">₹</span> <b style="font-size:22px">${fmt(er)}</b><div class="mute sm">Total Earned ›</div></div><div style="flex:1;border-left:2px dotted var(--line)"><span class="coin">₹</span> <b style="font-size:22px">${fmt(wd)}</b><div class="mute sm">Total Withdrawn</div></div></div></div>
+  <h2 style="font-size:26px;margin:4px 0 10px">Settings</h2>${row("⭐","Rate Us","toast('Rating opens after the Play Store launch')")}${row("🎫","My Tickets","tickets()")}${row("✈️","Join Telegram","tg()")}${row("💬","Join WhatsApp Channel","wch()")}${row("🧭","How to use app","tour(1)")}${row("💌","Messages","go('inbox')",unread()?`<span class="chip">${unread()} new</span>`:"")}${row("🔊","Sound effects","toggleSnd()",`<span class="chip">${snd()?"On":"Off"}</span>`)}${row("❓","Help &amp; Faq","go('faq')")}${row("✉️","Contact Support","location.href='mailto:'+SUPPORT_EMAIL")}${row("🔒","Privacy Policy","location.href='privacy.html'")}${row("📄","Terms of Service","location.href='terms.html'")}${row("⎋","Logout","confirmLogout()")}<p class="c mute sm" style="margin:14px 0">Sunshine Rewards v14</p>`;
 };
 const faq=()=>hd("Help &amp; FAQ")+`<section class="sh">${FAQ.map(([q,a],i)=>`<button class="fq" onclick="fq=fq===${i}?-1:${i};draw()"><span>${i+1}. ${q}</span><span>${fq===i?"⌄":"›"}</span></button>${fq===i?`<div class="fa">${a}</div>`:""}`).join("")}
  <p class="c" style="font-weight:800;margin-top:10px">Contact Us On</p><div class="fx" style="position:static;transform:none;width:auto;margin-top:8px"><button class="btn" onclick="${SUPPORT_EMAIL?`location.href='mailto:${SUPPORT_EMAIL}'`:"toast('Support email coming soon')"}">On Mail</button><button class="btn" onclick="tg()">On Telegram</button></div></section>`;
@@ -440,15 +509,15 @@ function tour(replay){return new Promise(res=>{
 
 /* ---- boot ---- */
 (function boot(){
-  $("#splash").innerHTML='<div class="glow"></div><div class="glow b"></div><img class="slogo" src="'+IMG.logo+'" alt="Sunshine Rewards"><div class="spn"></div><small>Loading...</small>';
-  $("#login").innerHTML='<img class="slogo st" src="'+IMG.logo+'" alt="Sunshine Rewards"><p>Finish simple offers. Earn real money.</p><button class="btn" onclick="login()">Continue with Google</button>';
+  $("#splash").innerHTML='<div class="rays"></div><img class="slogo" src="'+IMG.logo+'" alt="Sunshine Rewards"><p class="tag">Finish tasks. Earn rewards.</p><div class="pbar"><i></i></div><small>Loading...</small>';
+  $("#login").innerHTML='<div class="rays"></div><img class="slogo st" src="'+IMG.logo+'" alt="Sunshine Rewards"><p>Finish simple offers. Earn real money.</p><button class="btn" onclick="login()">Continue with Google</button>';
   const r=new URLSearchParams(location.search).get("ref");if(r)ls("sr_ref",r.toUpperCase().slice(0,12));
   firebase.initializeApp(FB);AUTH=firebase.auth();DB=firebase.firestore();
   AUTH.onAuthStateChanged(async u=>{
     if(!u){U=null;toLogin();return}
     const d=await DB.collection("users").doc(u.uid).get();
     if(d.exists)U=d.data();else{U=newUser(u.uid,u.displayName,u.email,u.photoURL);if(U.by===U.code)U.by="";await save()}
-    await loadLists();enter();
+    await loadLists();await loadMsgs();enter();
   });
 })();
 </script>

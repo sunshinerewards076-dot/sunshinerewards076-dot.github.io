@@ -50,12 +50,13 @@ input{width:100%;border:1.5px solid var(--line);border-radius:12px;padding:12px;
 #toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:11px 18px;border-radius:12px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:40;max-width:90%;text-align:center;font-weight:600}
 #toast.on{opacity:1}
 h3{font-size:17px;margin:16px 0 8px}
+textarea{width:100%;min-height:120px;border:1.5px solid var(--line);border-radius:12px;padding:12px;font:inherit;margin:10px 0;resize:vertical}
 </style>
 </head>
 <body>
 <div id="login" class="box"><h1>Sunshine Admin</h1><p class="mute">Only the admin Google account can enter.</p><button class="b" data-a="login">Sign in with Google</button><p id="err" style="color:#C00;font-weight:700"></p></div>
 <main id="app" hidden>
-  <header><b>Sunshine Admin <span style="font:400 12px system-ui;opacity:.85">v3</span></b><small id="who"></small><button class="b l s" data-a="logout">Logout</button></header>
+  <header><b>Sunshine Admin <span style="font:400 12px system-ui;opacity:.85">v4</span></b><small id="who"></small><button class="b l s" data-a="logout">Logout</button></header>
   <div id="tabs"></div>
   <section id="view"></section>
 </main>
@@ -69,6 +70,9 @@ const FB={apiKey:"AIzaSyBoomsal7jbIuLTvBBIUM0TgDwfRY0sbdY",authDomain:"sunshine-
 /* task id -> [name, reward]. Keep in sync with OFFERS in the app. */
 const OFFERS={"5paisa":["5paisa",260],angelone:["Angel One",120],stablemoney:["Stable Money",200],phonepe:["PhonePe",32],airtelbank:["Airtel Payments Bank",100],navi:["Navi",5],hdfc:["HDFC Securities",40],cashkaro:["CashKaro",2]};
 const REF=0.05;
+const hh=(h,e)=>[...(h||[]),e].slice(-100);
+const TPL=["Please upload a clear screenshot of the last page and submit your proof again.","Your proof was rejected. Please follow all the steps exactly and submit again.","Your reward has been credited. Thank you for using Sunshine Rewards!","Please open the task using only the Start Task link inside the app.","Your withdrawal has been paid. Please check your account."];
+const tplBtns=()=>`<div class="chips" style="margin:8px 0 0">${TPL.map((x,i)=>`<button class="b l s" data-a="tpl" data-v="${i}" style="min-height:34px;padding:6px 10px;font-size:12px">${E(x.slice(0,28))}...</button>`).join("")}</div>`;
 const spinsOf=u=>u.spins!==undefined?u.spins:(u.spin?0:1);
 const $=s=>document.querySelector(s);
 const E=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -107,7 +111,7 @@ const VIEWS={
   <button class="stat ${pw.length?"hot":""}" data-a="tab" data-id="wd"><b>${pw.length}</b><span>Pending withdrawals (${fmt(pw.reduce((a,w)=>a+(w.amt||0),0))} SC)</span></button>
   <button class="stat" data-a="tab" data-id="users"><b>${fmt(bal)}</b><span>Total user balance (SC)</span></button>
   <button class="stat" data-a="tab" data-id="wd"><b>${fmt(paid.reduce((a,w)=>a+(w.amt||0),0))}</b><span>Total paid out (SC)</span></button></div>
-  <button class="b g" style="width:100%;margin-bottom:10px" data-a="grantall">🎡 Give 1 spin chance to all users</button><p class="sm mute" style="margin:-2px 0 12px">Use this every Sunday. Each user gets +1 spin. They can spin only when they have a chance.</p>
+  <button class="b l" style="width:100%;margin-bottom:10px" data-a="msgall">📣 Message all users</button><button class="b g" style="width:100%;margin-bottom:10px" data-a="grantall">🎡 Give 1 spin chance to all users</button><p class="sm mute" style="margin:-2px 0 12px">Use this every Sunday. Each user gets +1 spin. They can spin only when they have a chance.</p>
   <button class="b" style="width:100%" data-a="refresh">Refresh data</button>`;
  },
  async proofs(){
@@ -130,7 +134,7 @@ function proofCard(x){
   <table class="kv">${det.map(([k,v])=>`<tr><td>${E(k)}</td><td>${cp(v)}</td></tr>`).join("")}
   <tr><td>Google email</td><td>${cp(x.email||u.email||"")}</td></tr><tr><td>Submitted</td><td>${when(x.t)}</td></tr><tr><td>User balance</td><td>${fmt(u.uc)} SC</td></tr></table>
   ${x.shot?`<img class="shot" data-a="zoom" src="${x.shot}" alt="Screenshot proof">`:'<p class="mute sm" style="margin-top:10px">No screenshot uploaded.</p>'}
-  <div class="acts">${x.status==="pending"?`<button class="b g" data-a="approve" data-id="${x.id}">Approve ₹${fmt(o[1])}</button><button class="b r" data-a="reject" data-id="${x.id}">Reject</button>`:""}<button class="b l" data-a="user" data-id="${x.uid}">View user</button></div></div>`;
+  <div class="acts">${x.status==="pending"?`<button class="b g" data-a="approve" data-id="${x.id}">Approve ₹${fmt(o[1])}</button><button class="b r" data-a="reject" data-id="${x.id}">Reject</button>`:""}<button class="b l" data-a="msg" data-id="${x.uid}">Message</button><button class="b l" data-a="user" data-id="${x.uid}">View user</button></div></div>`;
 }
 function wCard(w){
   const u=UM[w.uid]||{},bank=w.kind==="bank",main=bank?w.acc:w.upi;
@@ -138,7 +142,7 @@ function wCard(w){
   <div class="task"><b>${bank?"Bank transfer":"UPI transfer"}</b><b>₹${fmt(w.amt)}</b></div>
   <table class="kv"><tr><td>Name</td><td>${cp(w.name)}</td></tr><tr><td>${bank?"Account number":"UPI ID"}</td><td>${cp(main)}</td></tr>${bank?`<tr><td>IFSC</td><td>${cp(w.ifsc)}</td></tr>`:""}
   <tr><td>Amount</td><td>${cp(w.amt,"₹"+fmt(w.amt))}</td></tr><tr><td>Google email</td><td>${cp(w.email||u.email||"")}</td></tr><tr><td>Requested</td><td>${when(w.t)}</td></tr><tr><td>User balance now</td><td>${fmt(u.uc)} SC</td></tr></table>
-  <div class="acts">${w.status==="pending"?`<button class="b g" data-a="paid" data-id="${w.id}">Mark paid</button><button class="b r" data-a="refund" data-id="${w.id}">Reject and refund</button>`:""}<button class="b l" data-a="user" data-id="${w.uid}">View user</button></div></div>`;
+  <div class="acts">${w.status==="pending"?`<button class="b g" data-a="paid" data-id="${w.id}">Mark paid</button><button class="b r" data-a="refund" data-id="${w.id}">Reject and refund</button>`:""}<button class="b l" data-a="msg" data-id="${w.uid}">Message</button><button class="b l" data-a="user" data-id="${w.uid}">View user</button></div></div>`;
 }
 function showUsers(){
   const k=q.trim().toLowerCase(),l=[...users].sort((a,b)=>(b.joined||0)-(a.joined||0)).filter(u=>!k||[u.name,u.email,u.code].some(v=>String(v||"").toLowerCase().includes(k)));
@@ -154,6 +158,29 @@ const ACT={
  pf(id){PF=id;draw()},
  wf(id){WF=id;draw()},
  refresh(){draw(true)},
+ async msg(id){
+  const u=UM[id]||{};
+  openModal(`<h2 style="font-size:20px">Message to ${E(u.name||"user")}</h2><p class="sm mute">${E(u.email||"")}</p>${tplBtns()}<textarea id="mt" placeholder="Write your message or guidance here"></textarea><div class="acts"><button class="b g" data-a="sendmsg" data-id="${id}">Send message</button><button class="b l" data-a="close">Cancel</button></div>`);
+ },
+ tpl(id,t){$("#mt").value=TPL[Number(t.dataset.v)]},
+ async sendmsg(id,t){
+  const text=$("#mt").value.trim();if(text.length<2)throw new Error("Write a message first.");
+  t.disabled=true;
+  try{await DB.collection("messages").add({uid:id,from:"Sunshine Team",text,t:Date.now(),read:false});closeModal();toast("Message sent.")}catch(e){t.disabled=false;throw e}
+ },
+ async msgall(){
+  await loadUsers(true);
+  openModal(`<h2 style="font-size:20px">Message ALL users (${users.length})</h2><p class="sm mute">Every user will see this message when they open the app.</p>${tplBtns()}<textarea id="mt" placeholder="Write your announcement"></textarea><div class="acts"><button class="b g" data-a="sendall">Send to everyone</button><button class="b l" data-a="close">Cancel</button></div>`);
+ },
+ async sendall(id,t){
+  const text=$("#mt").value.trim();if(text.length<2)throw new Error("Write a message first.");
+  if(!confirm("Send this message to ALL "+users.length+" users?"))return;t.disabled=true;
+  try{
+    for(let i=0;i<users.length;i+=400){const b=DB.batch();users.slice(i,i+400).forEach(u=>b.set(DB.collection("messages").doc(),{uid:u.id,from:"Sunshine Team",text,t:Date.now(),read:false}));await b.commit()}
+    closeModal();toast("Message sent to everyone.");
+  }catch(e){t.disabled=false;throw e}
+ },
+
  async grantall(id,t){
   await loadUsers(true);
   if(!confirm("Give 1 spin chance to ALL "+users.length+" users?"))return;t.disabled=true;
@@ -179,9 +206,9 @@ const ACT={
     if(by){const r=await DB.collection("users").where("code","==",by).limit(1).get();if(!r.empty&&r.docs[0].id!==s.uid)rref=r.docs[0].ref}
     await DB.runTransaction(async tx=>{
       const a=await tx.get(sref);if(a.data().status!=="pending")throw new Error("Already handled.");
-      const u=(await tx.get(uref)).data(),rr=rref?(await tx.get(rref)).data():null,up={uc:(u.uc||0)+reward,earned:(u.earned||0)+reward};
+      const u=(await tx.get(uref)).data(),rr=rref?(await tx.get(rref)).data():null,up={uc:(u.uc||0)+reward,earned:(u.earned||0)+reward,hist:hh(u.hist,{t:Date.now(),k:"task",amt:reward,n:"Task: "+OFFERS[s.task][0]})};
       tx.update(sref,{status:"approved",reward,at:Date.now()});
-      if(rr){const b=Math.round(reward*REF*100)/100;tx.update(rref,{uc:(rr.uc||0)+b,earned:(rr.earned||0)+b,...(u.refCounted?{}:{refs:(rr.refs||0)+1})});up.refCounted=true}
+      if(rr){const b=Math.round(reward*REF*100)/100;tx.update(rref,{uc:(rr.uc||0)+b,earned:(rr.earned||0)+b,hist:hh(rr.hist,{t:Date.now(),k:"ref",amt:b,n:"Referral bonus ("+(u.name||"friend")+")"}),...(u.refCounted?{}:{refs:(rr.refs||0)+1})});up.refCounted=true}
       tx.update(uref,up);
     });
     toast("Approved. ₹"+reward+" credited.");lu=0;draw();
@@ -218,7 +245,7 @@ const ACT={
   <tr><td>Withdrawn (paid)</td><td>${fmt(paidT)} SC</td></tr><tr><td>Withdrawal pending</td><td>${fmt(pend)} SC</td></tr><tr><td>Referral code</td><td>${cp(u.code)}</td></tr>
   <tr><td>Referred by</td><td>${u.by?E(u.by)+(ref?" ("+E(ref.name)+", "+E(ref.email)+")":""):"Nobody"}</td></tr><tr><td>Successful referrals</td><td>${u.refs||0}</td></tr>
   <tr><td>Joined</td><td>${when(u.joined)}</td></tr><tr><td>Check-in streak</td><td>${u.streak||0} days (last ${E(u.last||"never")})</td></tr><tr><td>Spin chances</td><td>${spinsOf(u)}</td></tr><tr><td>Last spin</td><td>${E(u.spin||"never")}</td></tr></table>
-  <div class="acts"><button class="b" data-a="adj" data-id="${id}">Adjust balance</button><button class="b g" data-a="grantone" data-id="${id}">Give 1 spin</button></div>
+  <div class="acts"><button class="b" data-a="adj" data-id="${id}">Adjust balance</button><button class="b g" data-a="grantone" data-id="${id}">Give 1 spin</button><button class="b l" data-a="msg" data-id="${id}">Send message</button></div>
   <h3>Proofs (${ps.length})</h3>${ps.length?ps.map(p=>`<div class="row" style="padding:8px 0;border-bottom:1px solid #F7ECCB"><div><b>${E((OFFERS[p.task]||[p.task])[0])}</b><div class="sm mute">${when(p.t)}</div></div><span class="chip ${p.status}">${p.status}</span></div>`).join(""):'<p class="mute sm">No proofs yet.</p>'}
   <h3>Withdrawals (${ws.length})</h3>${ws.length?ws.map(w=>`<div class="row" style="padding:8px 0;border-bottom:1px solid #F7ECCB"><div><b>₹${fmt(w.amt)} ${w.kind==="bank"?"bank":"UPI"}</b><div class="sm mute">${when(w.t)}</div></div><span class="chip ${w.status}">${w.status}</span></div>`).join(""):'<p class="mute sm">No withdrawals yet.</p>'}`);
  },
@@ -231,7 +258,7 @@ const ACT={
   if(!n||!isFinite(n))throw new Error("Enter a valid amount.");
   t.disabled=true;const uref=DB.collection("users").doc(id);
   try{
-    await DB.runTransaction(async tx=>{const u=(await tx.get(uref)).data();if((u.uc||0)+n<0)throw new Error("Balance cannot go below zero.");tx.update(uref,{uc:(u.uc||0)+n,...(n>0?{earned:(u.earned||0)+n}:{})})});
+    await DB.runTransaction(async tx=>{const u=(await tx.get(uref)).data();if((u.uc||0)+n<0)throw new Error("Balance cannot go below zero.");tx.update(uref,{uc:(u.uc||0)+n,...(n>0?{earned:(u.earned||0)+n,hist:hh(u.hist,{t:Date.now(),k:"admin",amt:n,n:"Bonus from Sunshine Team"})}:{})})});
     closeModal();toast("Balance updated.");lu=0;draw();
   }catch(e){t.disabled=false;throw e}
  }
