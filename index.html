@@ -329,6 +329,8 @@ function mountAd(){
   f.onload=()=>{try{const b=f.contentDocument.body,chk=()=>{if([...b.children].some(c=>c.tagName!=="SCRIPT"))w.hidden=false};new MutationObserver(chk).observe(b,{childList:true});setTimeout(chk,1500)}catch(e){}};
 }
 
+let VIG=0;function vig(){if(VIG)return;VIG=1;(function(s){s.dataset.zone="12112215",s.src="https://n6wxm.com/vignette.min.js"})(document.documentElement.appendChild(document.createElement("script")))}
+
 /* ---- data ---- */
 const save=()=>DB.collection("users").doc(U.id).set(U);
 async function loadLists(){
@@ -358,7 +360,7 @@ function draw(){
   $("#nav").innerHTML=TABS.map(([k,l])=>`<button class="${k===P?"on":""}" aria-label="${l}" onclick="goTab('${k}')"><svg viewBox="0 0 24 24">${IC[k]}</svg><span>${l}</span></button>`).join("");
   scrollTo(0,0);
   if(P==="home")startBanner();
-  if(P==="offer"||P==="wallet")mountAd();
+  if(P==="offer"||P==="wallet"||P==="profile")mountAd();if(P==="offer"||P==="profile")vig();
   if(P==="earn"&&loading)setTimeout(()=>{loading=false;if(P==="earn")draw()},500);
 }
 function startBanner(){let i=0;bt=setInterval(()=>{const t=$("#bt");if(!t)return;i=(i+1)%3;t.style.transform=`translateX(-${i*100}%)`},4200)}
@@ -495,6 +497,7 @@ async function doRedeem(k){
   else{rec.upi=rec.acc=$("#ac").value.trim();rec.ifsc=$("#if").value.trim().toUpperCase();if(!/^\d{9,18}$/.test(rec.acc))return toast("Enter a valid account number.");if(!/^[A-Z]{4}0[A-Z0-9]{6}$/.test(rec.ifsc))return toast("Enter a valid IFSC code.")}
   if(!(am>=5&&am<=500))return toast("Amount must be between 5 and 500.");
   if(am>U.uc)return toast("You do not have enough balance.");
+  if(WDB)return;WDB=1;const okAd=await adBreak();WDB=0;if(!okAd)return;
   U.uc-=am;await save();await addRec("withdrawals",rec);WTB="red";hist=[];P="wallet";draw();sfx("cash");boom();msg(true,"Success","Withdrawal requested. It will be paid after review.");
 }
 
@@ -502,7 +505,7 @@ const profile=()=>{
   const wd=wdPaid(),er=earnedShown(),row=(i,t,f,x="")=>`<button class="set" onclick="${f}"><span class="ic">${i}</span><b>${t}</b>${x}<em>›</em></button>`;
   return hd("Profile")+`<div class="tk" style="--n:62px"><div style="display:flex;gap:12px;align-items:center"><img class="av" src="${E(U.photo||AV)}" alt="" referrerpolicy="no-referrer"><div><b>${E(U.name)}</b><div class="mute sm">${E(U.email)}</div></div></div><hr>
   <div class="row c"><div style="flex:1;cursor:pointer" onclick="openHistory()"><span class="coin">₹</span> <b style="font-size:22px">${fmt(er)}</b><div class="mute sm">Total Earned ›</div></div><div style="flex:1;border-left:2px dotted var(--line)"><span class="coin">₹</span> <b style="font-size:22px">${fmt(wd)}</b><div class="mute sm">Total Withdrawn</div></div></div></div>
-  <h2 style="font-size:26px;margin:4px 0 10px">Settings</h2>${row("⭐","Rate Us","toast('Rating opens after the Play Store launch')")}${row("🎫","My Tickets","tickets()")}${row("✈️","Join Telegram","tg()")}${row("💬","Join WhatsApp Channel","wch()")}${row("🧭","How to use app","tour(1)")}${row("💌","Messages","go('inbox')",unread()?`<span class="chip">${unread()} new</span>`:"")}${row("🔊","Sound effects","toggleSnd()",`<span class="chip">${snd()?"On":"Off"}</span>`)}${row("❓","Help &amp; Faq","go('faq')")}${row("✉️","Contact Support","location.href='mailto:'+SUPPORT_EMAIL")}${row("🔒","Privacy Policy","location.href='privacy.html'")}${row("📄","Terms of Service","location.href='terms.html'")}${row("⎋","Logout","confirmLogout()")}<p class="c mute sm" style="margin:14px 0">Sunshine Rewards v14</p>`;
+  <h2 style="font-size:26px;margin:4px 0 10px">Settings</h2>${row("⭐","Rate Us","toast('Rating opens after the Play Store launch')")}${row("🎫","My Tickets","tickets()")}${row("✈️","Join Telegram","tg()")}${row("💬","Join WhatsApp Channel","wch()")}${row("🧭","How to use app","tour(1)")}${row("💌","Messages","go('inbox')",unread()?`<span class="chip">${unread()} new</span>`:"")}${row("🔊","Sound effects","toggleSnd()",`<span class="chip">${snd()?"On":"Off"}</span>`)}${row("❓","Help &amp; Faq","go('faq')")}${row("✉️","Contact Support","location.href='mailto:'+SUPPORT_EMAIL")}${row("🔒","Privacy Policy","location.href='privacy.html'")}${row("📄","Terms of Service","location.href='terms.html'")}${row("⎋","Logout","confirmLogout()")}<p class="c mute sm" style="margin:14px 0">Sunshine Rewards v14</p>${adSlot()}<div style="height:90px"></div>`;
 };
 const faq=()=>hd("Help &amp; FAQ")+`<section class="sh">${FAQ.map(([q,a],i)=>`<button class="fq" onclick="fq=fq===${i}?-1:${i};draw()"><span>${i+1}. ${q}</span><span>${fq===i?"⌄":"›"}</span></button>${fq===i?`<div class="fa">${a}</div>`:""}`).join("")}
  <p class="c" style="font-weight:800;margin-top:10px">Contact Us On</p><div class="fx" style="position:static;transform:none;width:auto;margin-top:8px"><button class="btn" onclick="${SUPPORT_EMAIL?`location.href='mailto:${SUPPORT_EMAIL}'`:"toast('Support email coming soon')"}">On Mail</button><button class="btn" onclick="tg()">On Telegram</button></div></section>`;
@@ -581,6 +584,22 @@ async function lfClaim(){
     c.animate([{transform:"translateY(-40px) rotate(0)"},{transform:`translateY(${innerHeight+60}px) rotate(${360+Math.random()*360}deg)`}],{duration:1500+Math.random()*1500,delay:600+Math.random()*700,easing:"ease-in",fill:"backwards"}).onfinish=()=>c.remove()}
   bt.disabled=false;bt.textContent="Awesome!";bt.onclick=lfClose;
   const s=b.querySelector("small:last-child");if(s)s.textContent="Added to your wallet 🎉";
+}
+
+/* ---- withdrawal ad break: paste your Monetag Direct Link URL below ---- */
+const WD_AD={url:"https://uplcm.com/4/12118757"};let WDB=0;
+function adBreak(){
+  if(!WD_AD.url)return Promise.resolve(true);
+  return new Promise(res=>{
+    const b=lfBox();let t0=0,ok=false,hid=false;
+    b.className="on";
+    b.innerHTML='<div class="ray"></div><h1>One quick step</h1><p>Watch a short sponsor page, then come back to confirm your withdrawal.</p><button class="btn lfb" id="adg">Watch Ad</button><small id="adx" style="cursor:pointer;text-decoration:underline">Cancel</small>';
+    const g=$("#adg"),end=v=>{document.removeEventListener("visibilitychange",vc);b.className="";b.innerHTML="";res(v)};
+    const ready=()=>{ok=true;g.disabled=false;g.textContent="Continue";g.onclick=()=>end(true)};
+    function vc(){if(document.hidden){hid=true;return}if(!hid||ok)return;g.textContent="Please wait…";setTimeout(ready,Math.max(0,5000-(Date.now()-t0)))}
+    g.onclick=()=>{t0=Date.now();g.disabled=true;g.textContent="Opening ad…";document.addEventListener("visibilitychange",vc);open(WD_AD.url,"_blank");setTimeout(()=>{if(!hid&&!ok){g.disabled=false;g.textContent="Watch Ad";toast("Please allow the ad page to open.")}},2500)};
+    $("#adx").onclick=()=>end(false);
+  });
 }
 
 /* ---- boot ---- */
