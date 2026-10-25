@@ -313,7 +313,7 @@ async function loadLists(){
   subs=a.docs.map(d=>d.data());wds=b.docs.map(d=>d.data());
 }
 async function addRec(col,rec){(col==="submissions"?subs:wds).push(rec);await DB.collection(col).add(rec)}
-const newUser=(id,name,email,photo)=>({id,name:name||"Friend",email:email||"",photo:photo||"",uc:2,earned:2,streak:0,last:"",spin:"",spins:1,hist:[{t:Date.now(),k:"bonus",amt:2,n:"Welcome bonus"}],code:id.replace(/\W/g,"").slice(0,8).toUpperCase(),by:ls("sr_ref")||"",joined:Date.now()});
+const newUser=(id,name,email,photo)=>({id,name:name||"Friend",email:email||"",photo:photo||"",uc:0,earned:0,streak:0,last:"",spin:"",spins:1,hist:[],code:id.replace(/\W/g,"").slice(0,8).toUpperCase(),by:ls("sr_ref")||"",joined:Date.now()});
 async function login(){try{await AUTH.signInWithPopup(new firebase.auth.GoogleAuthProvider())}catch(e){toast("Sign-in failed. Check Firebase settings and try again.")}}
 const logout=()=>AUTH.signOut();
 async function enter(){await gate();$("#login").hidden=true;$("#app").hidden=false;goTab("home");setTimeout(showNewMsg,900)}
