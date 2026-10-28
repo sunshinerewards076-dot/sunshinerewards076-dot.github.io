@@ -326,6 +326,53 @@ const inbox=()=>{
   return hd("Messages")+(l.length?l.map(m=>`<div class="card" style="${nw.has(m.id)?"border-color:var(--a2);background:#FFF8E6":""}"><div class="row"><b>${E(m.from||"Sunshine Team")}</b><span class="mute sm">${new Date(m.t).toLocaleDateString()}</span></div><p style="margin-top:6px">${nl(m.text)}</p>${nw.has(m.id)?'<span class="chip">New</span>':""}</div>`).join(""):'<p class="c mute" style="padding:60px 0">No messages yet.</p>');
 };
 /* ---- ads: only on task page and wallet, inside a bottom banner box ---- */
+
+/* ---- data ---- */
+const save=()=>DB.collection("users").doc(U.id).set(U);
+async function loadLists(){
+  const [a,b]=await Promise.all([DB.collection("submissions").where("uid","==",U.id).get(),DB.collection("withdrawals").where("uid","==",U.id).get()]);
+  subs=a.docs.map(d=>d.data());wds=b.docs.map(d=>d.data());
+}
+async function addRec(col,rec){(col==="submissions"?subs:wds).push(rec);await DB.collection(col).add(rec)}
+const newUser=(id,name,email,photo)=>({id,name:name||"Friend",email:email||"",photo:photo||"",uc:0,earned:0,streak:0,last:"",spin:"",spins:1,hist:[],code:id.replace(/\W/g,"").slice(0,8).toUpperCase(),by:ls("sr_ref")||"",joined:Date.now()});
+async function login(){try{await AUTH.signInWithPopup(new firebase.auth.GoogleAuthProvider())}catch(e){toast("Sign-in failed. Check Firebase settings and try again.")}}
+const logout=()=>AUTH.signOut();
+async function enter(){await gate();$("#login").hidden=true;$("#app").hidden=false;goTab("home");setTimeout(showNewMsg,900);if(LF_LINK)setTimeout(lifafaCheck,400)}
+async function toLogin(){await gate();$("#app").hidden=$("#nav").hidden=true;$("#login").hidden=false}
+const sub=id=>subs.filter(s=>s.task===id).sort((a,b)=>b.t-a.t)[0];
+const streakNow=()=>(U.last===day()||U.last===day(1))?U.streak:0;
+
+/* ---- routing ---- */
+const TAB=TABS.map(t=>t[0]);
+function goTab(p){hist=[];P=p;A=null;if(p==="earn")loading=true;draw()}
+function go(p,a){hist.push([P,A]);P=p;A=a;draw()}
+function back(){const h=hist.pop()||["home",null];P=h[0];A=h[1];draw()}
+function toEarn(t){ET=t;goTab("earn")}
+function draw(){
+  clearInterval(bt);
+  const f={home,earn,refer,wallet,profile,rewards,offer,redeem,faq,inbox}[P];
+  $("#app").innerHTML=`<div class="pg">${f(A)}</div>`;
+  $("#nav").hidden=!TAB.includes(P);
+  $("#nav").innerHTML=TABS.map(([k,l])=>`<button class="${k===P?"on":""}" aria-label="${l}" onclick="goTab('${k}')"><svg viewBox="0 0 24 24">${IC[k]}</svg><span>${l}</span></button>`).join("");
+  scrollTo(0,0);
+  if(P==="home")startBanner();
+  
+  if(P==="earn"&&loading)setTimeout(()=>{loading=false;if(P==="earn")draw()},500);
+}
+function startBanner(){let i=0;bt=setInterval(()=>{const t=$("#bt");if(!t)return;i=(i+1)%3;t.style.transform=`translateX(-${i*100}%)`},4200)}
+const wch=()=>open(WHATSAPP,"_blank");
+const tg=()=>TELEGRAM?open(TELEGRAM,"_blank"):toast("Telegram link coming soon");
+
+/* ---- pieces ---- */
+const pill=()=>`<button class="pill" aria-label="Open wallet" onclick="goTab('wallet')"><span class="coin">₹</span><b>${fmt(U.uc)}</b></button>`;
+const gift=`<button class="gift" aria-label="Rewards" onclick="go('rewards')">🎁</button>`;
+const hd=(t,x="")=>`<header class="hd"><button class="rb" aria-label="Back" onclick="back()">←</button><h1>${t}</h1>${x}${gift}${pill()}</header>`;
+const ofr=o=>`<button class="of" onclick="go('offer','${o.id}')"><span class="nm"><span class="lg">${lg(o.id,o.logo)}</span>${E(o.name)}</span><span class="rw"><span class="coin">₹</span>${fmt(o.reward)}</span></button>`;
+const rib=(cls,label,title,subt,amt,logo)=>`<div class="rib ${cls}"><em>${label}</em><span class="nm"><span class="lg">${logo}</span><span>${E(title)}<small>${E(subt)}</small></span></span><span class="rw"><span class="coin">₹</span>${amt}</div>`.replace("</div>","</span></div>");
+const lg=(id,t)=>{const o=OFFERS.find(x=>x.id===id);return o&&o.img?`<img src="${o.img}" alt="" style="width:100%;height:100%;object-fit:contain;background:#fff">`:E(t)};
+const nm=id=>(OFFERS.find(o=>o.id===id)||{name:id}).name;
+
+/* ---- pages ---- */
 const home=()=>`<header class="hd"><img class="av" src="${E(U.photo||AV)}" alt="" referrerpolicy="no-referrer"><div class="hi"><small>Welcome back,</small><b>${E(U.name.split(" ")[0])}</b></div>${bell()}${gift}${pill()}</header>
 <div class="bn"><div class="bt" id="bt">
  <button class="bs a" onclick="tg()"><h2>Join Sunshine Telegram Channel, Get Sun Coins</h2><span class="jb">Join Now</span></button>
